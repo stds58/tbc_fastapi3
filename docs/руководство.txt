@@ -1,0 +1,84 @@
+
+https://github.com/madscheme/fastapi/tree/main
+https://habr.com/ru/articles/827222/
+https://habr.com/ru/users/yakvenalex/articles/
+https://habr.com/ru/companies/amvera/articles/849836/ бд
+
+###################################################################
+python.exe -m pip install --upgrade pip
+pip install fastapi
+pip install "uvicorn[standard]"
+pip install jinja2 #Для использования шаблонов в FastAPI вам нужно установить библиотеку Jinja2
+pip install python-multipart #Работа с формами
+pip install fastapi-pagination
+
+###################################################################
+# работа с бд
+pip install sqlalchemy #орм
+pip install asyncpg #асинхронный драйвер для PostgreSQL, который позволяет использовать возможности асинхронного программирования с SQLAlchemy
+pip install -U pydantic[all] #-U — обновляет Pydantic до последней версии, если он уже установлен,
+                             #или просто установит последнюю доступную версию, если Pydantic отсутствует.
+                             #[all] — этот флаг добавляет всевозможные дополнительные модули и валидаторы,
+                             #которые могут быть полезны в проекте, такие как валидатор email-адресов и другие расширенные функции.
+pip install pydantic-settings #отдельная библиотека, которую мы будем использовать для хранения настроек.
+pip install pydantic-settings python-dotenv
+pip install alembic #миграции
+alembic init alembic
+alembic init -t async migration
+pip install sqlfluff #проверка sql синтаксиса
+sqlfluff lint alembic/versions
+
+pip install sqlacodegen
+pip install psycopg2-binary #синхронный драйвер для PostgreSQL
+sqlacodegen postgresql://admin:prod@192.168.28.1:6003/postgresbriz > appbriz/models.py
+
+###################################################################
+pip install httpie #текстовый веб-клиент HTTPie (https://httpie.io)
+pip install requests #пакет синхронного веб-клиента Requests (https://requests.readthedocs.io)
+pip install httpx #пакет синхронного/асинхронного веб-клиента HTTPX (https://www.pythonhttpx.org)
+pip install pytest
+pip install pytest-mock # автоматическая фикстура mocker
+pip install mypy #статический анализатор
+pip install watchfiles
+pip install opentelemetry-api
+pip install opentelemetry-sdk
+
+###################################################################
+
+статический анализатор
+pip install mypy
+в терминале mypy stuff.py(имя файла)
+
+pip freeze > requirements.txt
+pip install -r requirements.txt
+
+oauth2
+pip install python-jose[cryptography] # JWT handling
+pip install passlib # Secure password handling
+pip install python-multipart # Form handling
+
+
+
+
+Запуск приложения
+uvicorn main:app --reload
+C:
+cd C:\tbc_fastapi3\pythonProject1
+C:\tbc_fastapi3\pythonProject1\.venv\Scripts\uvicorn.exe app.main:app --reload
+В данном случае мы запускаем сервер uvicorn и передаем ему ряд параметров:
+    main указывает на название модуля, которое по умолчанию совпадает с названием файла - main
+    app указывает на объект приложения, созданный в строке app = FastAPI()
+    --reload позволяет отслеживать изменения в файлах исходного кода и автоматически перезапускать проект
+
+
+прибить процесс в винде
+    Найдите PID процесса:
+        tasklist | findstr python
+    Это выведет список всех запущенных процессов Python. Например:
+        python.exe                   1234 Console                    1     50,000 K
+    Завершите процесс:
+        taskkill /PID 1234 /F
+
+
+
+

@@ -1,0 +1,3 @@
+https://habr.com/ru/companies/otus/articles/903578/
+Год с uv — инструментом управления Python-проектами: плюсы, минусы и стоит ли переходить
+

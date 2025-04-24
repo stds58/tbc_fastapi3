@@ -1,0 +1,73 @@
+
+# ignore all logs
+*.log
+
+# virtualenv
+.venv
+venv/
+ENV/
+.vscode
+
+# celery beat schedule file
+celerybeat-schedule
+
+# Django #
+__pycache__
+__pycache__/
+#migrations/
+#migrations/__pycache__/
+
+# IDE
+.idea/
+idea/
+
+.redis.conf/
+.redis_docker/
+redis.conf/
+redis_docker/
+
+
+# Environments
+tbc/.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# db
+db.sqlite3
+
+# Visual Studio Code #
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history
+
+
+.safetensors
+
+#/tbc/apporder/__pycache__/
+#/tbc/**/__pycache__/
+#/tbc/apporder/migrations/__pycache__/
+
+#/appbackup_dictionaries/migrations/__pycache__/
+#/appcommand/migrations/__pycache__/
+#/appcomment/migrations/__pycache__/
+#/appdictionary/migrations/__pycache__/
+#/appinput/migrations/__pycache__/
+#/appinvoice/migrations/__pycache__/
+#/applog/migrations/__pycache__/
+#/apporder/migrations/__pycache__/
+#/apptest/migrations/__pycache__/
+#/apptest/migrations/__pycache__/
+#/apptest2/migrations/__pycache__/
+#/appuser/migrations/__pycache__/
+
+
+/tbc/staticcollect/
+/staticcollect/
+/redis_docker/

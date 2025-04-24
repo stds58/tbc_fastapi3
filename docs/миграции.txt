@@ -1,0 +1,124 @@
+
+# Для создания миграций нам нужно зайти в папку «app» через консоль (cd app) и там выполнить команду:
+alembic init -t async migration
+
+# Слово migration можно заменить на любое другое нужное вам. Часто пишут так
+alembic init -t async alembic
+
+# После выполнения данной команды будет сгенерирован файл alembic.ini и папка migrations.
+# Теперь нам необходимо выполнить несколько трюков, чтоб та структура проекта FastApi, которую я вам предлагаю заработала.
+# Перемещаем файл alembic.ini с папки app в корень проекта
+# В файле alembic.ini заменяем строку script_location=migration на script_location = app/migration
+# Заходим в папку migration, которая появилась в дирректории app и там находим файл env.py.
+# Правим файл env.py следующим образом.
+# Добавляем в файл новые импорты:
+
+import sys
+from os.path import dirname, abspath
+
+sys.path.insert(0, dirname(dirname(abspath(__file__))))
+
+from app.database import DATABASE_URL, Base
+from app.students.models import Student, Major
+
+# В данном случае мы «обманули» Alembic, заставив его думать, что он находится в папке app.
+# Это необходимо, чтобы Alembic правильно обрабатывал импорты и понимал, как они работают в проекте.
+# Порядок импортов тут крайне важен. Сначала мы импортируем класс Base, а после уже модели наших библиотек.
+
+# Далее нам необходимо добавить несколько строк. Первая строка:
+
+config.set_main_option("sqlalchemy.url", DATABASE_URL)
+# config: Это объект конфигурации Alembic (alembic.config.Config),
+# который используется для управления параметрами и настройками миграций.
+
+set_main_option("sqlalchemy.url", DATABASE_URL):
+# Этот метод устанавливает основную опцию sqlalchemy.url в конфигурации Alembic.
+# Он используется для указания URL, по которому Alembic будет подключаться к базе данных SQLAlchemy.
+
+# Вторая строка :
+target_metadata = Base.metadata
+# Base.metadata: Это атрибут metadata вашего базового класса SQLAlchemy (Base),
+# который содержит информацию о структуре вашей базы данных.
+
+# Зачем это делается?
+# Создание целевых метаданных для миграций:
+# Alembic использует target_metadata для сравнения текущей структуры базы данных с тем,
+# как она должна выглядеть после применения миграций.
+# Это позволяет Alembic автоматически генерировать миграции на основе изменений в вашей модели данных.
+# Согласованность структуры данных: Использование Base.metadata гарантирует,
+# что Alembic работает с актуальной структурой вашей базы данных, которая определена в ваших моделях SQLAlchemy.
+
+# Полный код изменений:
+
+import asyncio
+from logging.config import fileConfig
+from sqlalchemy import pool
+from sqlalchemy.engine import Connection
+from sqlalchemy.ext.asyncio import async_engine_from_config
+from alembic import context
+
+import sys
+from os.path import dirname, abspath
+
+sys.path.insert(0, dirname(dirname(abspath(__file__))))
+
+from app.database import DATABASE_URL, Base
+from app.students.models import Student, Major
+
+config = context.config
+config.set_main_option("sqlalchemy.url", DATABASE_URL)
+if config.config_file_name is not None:
+    fileConfig(config.config_file_name)
+
+target_metadata = Base.metadata
+
+# то что идет дальше пока оставляем без изменений
+# Надеюсь, что доступно объяснил. Если нет, то можете просто повторять.
+# Настраивается это все дело один раз на конкретный проект.
+
+
+cd ../
+# Далее вводим команду:
+alembic revision --autogenerate -m "Initial revision"
+
+Команда alembic revision --autogenerate -m "Initial revision"
+используется для автоматической генерации миграции базы данных с помощью Alembic.
+Давайте разберем, что делает эта команда и зачем нужен флаг --autogenerate.
+
+Общее описание команды
+alembic revision: Это команда Alembic для создания новой ревизии (миграции) базы данных.
+--autogenerate: Флаг, который указывает Alembic автоматически сгенерировать миграцию
+                на основе изменений в моделях SQLAlchemy и текущей структуре базы данных.
+-m "Initial revision": Опция -m используется для добавления сообщения о миграции.
+                       В данном случае сообщение "Initial revision" указывает на то, что это первая (начальная) миграция.
+                       Вы можете указать любое свое сообщение, но, советую это делать осмысленно.
+
+Зачем используется флаг --autogenerate
+Автоматическое создание миграций:
+Флаг --autogenerate позволяет Alembic анализировать текущее состояние базы данных и сравнивать его с определениями моделей SQLAlchemy.
+На основе этих сравнений Alembic генерирует код миграции, который включает изменения структуры базы данных
+(такие как создание новых таблиц, изменение существующих столбцов и т.д.).
+
+Упрощение процесса:
+Автоматическая генерация миграций с флагом --autogenerate упрощает процесс управления изменениями в базе данных,
+особенно когда ваши модели данных SQLAlchemy изменяются.
+Это позволяет избежать ручного написания сложных SQL-запросов для каждого изменения.
+
+Как это работает
+Сравнение текущего состояния с моделями:
+Alembic анализирует текущую структуру базы данных и сравнивает её с определениями моделей SQLAlchemy,
+которые хранятся в target_metadata (как мы рассмотрели ранее).
+
+Генерация миграционного скрипта:
+На основе выявленных различий Alembic автоматически генерирует код Python,
+который описывает необходимые изменения структуры базы данных.
+
+Применение и откат миграций:
+Сгенерированный миграционный скрипт можно применить к базе данных с помощью команды alembic upgrade head,
+а при необходимости выполнить откат изменений с помощью alembic downgrade
+
+
+
+
+
+

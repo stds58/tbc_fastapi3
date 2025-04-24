@@ -1,0 +1,70 @@
+
+pip install opentelemetry-api
+pip install opentelemetry-sdk
+
+
+pip install opentelemetry-instrumentation-django
+opentelemetry-instrument python manage.py runserver
+
+
+pip install opentelemetry-instrumentation-fastapi
+from fastapi import FastAPI
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+
+app = FastAPI()
+
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
+
+# Автоматическое инструментирование
+FastAPIInstrumentor.instrument_app(app)
+
+
+# Для экспорта данных в Jaeger установите дополнительные пакеты
+pip install opentelemetry-exporter-jaeger
+
+
+# Настройка OpenTelemetry для Jaeger
+# Добавьте код для настройки OpenTelemetry с использованием Jaeger. Например
+
+from fastapi import FastAPI
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.jaeger.thrift import JaegerExporter
+
+app = FastAPI()
+
+# Настройка провайдера трассировки
+trace.set_tracer_provider(TracerProvider())
+
+# Настройка экспортёра Jaeger
+jaeger_exporter = JaegerExporter(
+    agent_host_name="localhost",  # Хост Jaeger
+    agent_port=6831,             # Порт Jaeger
+)
+
+# Добавление процессора для отправки данных
+trace.get_tracer_provider().add_span_processor(
+    BatchSpanProcessor(jaeger_exporter)
+)
+
+# Автоматическое инструментирование FastAPI
+FastAPIInstrumentor.instrument_app(app)
+
+@app.get("/")
+def read_root():
+    return {"message": "Hello, World!"}
+
+# Запуск Jaeger через Docker
+docker run -d --name jaeger -p 6831:6831/udp -p 16686:16686 jaegertracing/all-in-one:latest
+
+# Проверка работы Jaeger
+http://localhost:16686
+
+
+
+
+

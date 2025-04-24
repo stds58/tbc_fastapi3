@@ -1,0 +1,130 @@
+https://habr.com/ru/companies/amvera/articles/849836/
+Для начала работы с Alembic, нам нужно выполнить его инициализацию с поддержкой асинхронного взаимодействия с базой данных.
+Это можно сделать с помощью следующей команды:
+    alembic init -t async migration
+После выполнения этой команды в корне проекта появится директория migration и файл alembic.ini.
+Директория migration будет содержать файлы для управления миграциями, а alembic.ini — файл конфигурации Alembic,
+который потребуется нам для настройки подключения к базе данных.
+
+
+####################################################################
+
+Убедитесь, что миграция была сгенерирована (alembic revision --autogenerate).
+    alembic revision --autogenerate -m "Auto-generated migration"
+
+Проверьте содержимое файла миграции на наличие операции op.add_column.
+
+Убедитесь, что миграция еще не была применена (alembic current).
+
+Проверьте правильность настройки Alembic и моделей.
+
+При необходимости очистите метаданные Alembic (alembic stamp base).
+
+Если все настроено правильно, команда alembic upgrade head должна успешно добавить новое поле в базу данных
+    alembic upgrade head либо
+    alembic upgrade b4f9c8b0c0ad(имя последней миграции)
+    В данном случае b4f9c8b0c0ad — это уникальный идентификатор нужной миграции.
+    Alembic выполнит все миграции до указанного ID, обновив базу данных до состояния, соответствующего этой версии.
+
+
+
+Вы можете создать собственный скрипт или команду, которая будет выполнять все необходимые шаги автоматически. Например:
+#!/bin/bash
+alembic revision --autogenerate -m "Auto-generated migration"
+alembic upgrade head
+
+Интеграция с CI/CD
+Если вы используете систему непрерывной интеграции (CI/CD),
+вы можете настроить автоматическое выполнение миграций при каждом деплое или слиянии кода в основную ветку.
+
+Проверка состояния моделей
+Alembic не отслеживает изменения в моделях в реальном времени.
+Если вы хотите минимизировать ручные действия, убедитесь,
+что ваши модели всегда находятся в актуальном состоянии,
+и регулярно проверяйте их соответствие базе данных.
+
+Используйте --sql для предварительного просмотра :
+Чтобы увидеть, какие SQL-запросы будут выполнены, используйте флаг --sql
+    alembic upgrade head --sql
+
+Для отмены последнего изменения достаточно выполнить команду:
+    alembic downgrade -1 либо
+    alembic downgrade d97a9824423b
+
+####################################################################
+
+сравнивает метаданные модели SQLAlchemy с текущим состоянием базы данных и сообщает о несоответствиях
+    alembic check
+
+показывает текущую версию миграций, примененную к базе данных. Это помогает убедиться, что миграции находятся в ожидаемом состоянии
+    alembic current
+
+показывает историю миграций, включая их хэши и сообщения. Это полезно для анализа последовательности миграци
+    alembic history
+
+SQLAlchemy-specific tools
+Если вы хотите проверить корректность SQL-запросов, используемых в миграциях,
+вы можете использовать инструменты, такие как sqlalchemy-checks или sqlfluff.
+Эти инструменты помогут убедиться, что SQL-синтаксис в миграциях правильный.
+    pip install sqlfluff
+    sqlfluff lint alembic/versions/
+    sqlfluff lint app/migration/versions
+
+Автоматизация проверок
+Вы можете добавить проверки в CI/CD-конвейер (например, GitHub Actions, GitLab CI или Jenkins).
+Пример конфигурации .github/workflows/check-migrations.yml для GitHub Actions:
+name: Check Migrations
+
+on:
+  push:
+    paths:
+      - "alembic/**"
+  pull_request:
+    paths:
+      - "alembic/**"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          pip install flake8 black mypy sqlfluff
+
+      - name: Run Flake8
+        run: flake8 alembic/versions/
+
+      - name: Run Black
+        run: black --check alembic/versions/
+
+      - name: Run mypy
+        run: mypy alembic/versions/
+
+      - name: Run SQLFluff
+        run: sqlfluff lint alembic/versions/
+
+
+
+Ручная проверка миграций
+Если вы хотите проверить миграции вручную, выполните следующие шаги:
+
+Проверьте логику миграций :
+Убедитесь, что все операции op.add_column, op.drop_column, op.create_table и т.д. корректны и согласованы с моделью SQLAlchemy.
+Протестируйте миграции :
+Примените миграции к тестовой базе данных и убедитесь, что они работают без ошибок:
+    alembic upgrade head
+Откатите миграции :
+Проверьте, что миграции можно откатить без ошибок:
+    alembic downgrade -1
+
+
+
+

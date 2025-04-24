@@ -1,0 +1,28 @@
+
+многопроцессорный модуль
+https://docs.python.org/3/library/multiprocessing.html
+
+Если вы хотите узнать точное количество физических ядер (без учета Hyper-Threading), вам понадобится сторонний модуль
+pip install psutil
+
+пакет работы с потоками
+https://docs.python.org/3/library/threading.html
+
+concurrent.futures
+https://docs.python.org/3/library/concurrent.futures.html
+
+asyncio
+https://docs.python.org/3/library/asyncio.html
+
+зелёные потоки
+greenlet (https://greenlet.readthedocs.io/en/latest/)
+    pip install greenlet
+gevent (http://www.gevent.org)
+    pip install gevent
+Eventlet (https://eventlet.net)
+    Установка с обновлением:
+    pip install -U eventlet
+    To install latest development version once:
+    pip install -U https://github.com/eventlet/eventlet/archive/master.zip
+
+

@@ -1,0 +1,122 @@
+https://habr.com/ru/companies/amvera/articles/849836/
+
+Важные нюансы работы с Alembic и ENUM типами данных
+Когда вы используете Alembic для управления миграциями, нужно учитывать несколько важных особенностей,
+связанных с типами данных ENUM в PostgreSQL.
+Давайте разберемся с двумя основными проблемами и способами их решения.
+
+1. Проблемы при создании колонки с ENUM
+После того как тип данных ENUM создан в PostgreSQL, его имя резервируется и считается уникальным.
+При работе с Alembic эта особенность не всегда учитывается автоматически, что может привести к ошибкам в будущем.
+
+Пример проблемы
+Допустим, у нас есть такая колонка:
+    sa.Column('gender', sa.Enum('MALE', 'FEMALE', name='genderenum'), nullable=False)
+При первом запуске миграции Alembic корректно создаст таблицу и ENUM-тип для этой колонки.
+Однако если в будущем вы захотите изменить этот ENUM (например, добавить новое значение),
+при повторных миграциях вы можете столкнуться с ошибкой, так как Alembic попытается создать тип genderenum,
+который уже существует в базе данных.
+
+Решение
+Чтобы избежать этой проблемы, нужно явно указать параметр create_type=False, чтобы Alembic не пытался повторно создать ENUM-тип:
+    sa.Column('gender', sa.Enum('MALE', 'FEMALE', name='genderenum', create_type=False), nullable=False)
+Совет: Всегда указывайте create_type=False для колонок с ENUM, чтобы избежать конфликтов при повторных миграциях.
+
+2. Проблемы при откате миграций (downgrade)
+При удалении таблиц с помощью Alembic таблицы удаляются, но связанные с ними ENUM-ы остаются в базе данных.
+Это может привести к конфликтам, если в будущем вы захотите использовать те же имена для новых ENUM-типов.
+
+Решение
+Чтобы Alembic корректно удалял типы ENUM при откате миграций, нужно расширить метод downgrade следующим образом:
+def downgrade() -> None:
+    # Удаление таблиц
+    op.drop_table('comments')
+    op.drop_table('posts')
+    op.drop_table('users')
+    op.drop_table('profiles')
+
+    # Удаление типов ENUM
+    op.execute('DROP TYPE IF EXISTS ratingenum')
+    op.execute('DROP TYPE IF EXISTS genderenum')
+    op.execute('DROP TYPE IF EXISTS professionenum')
+    op.execute('DROP TYPE IF EXISTS statuspost')
+В этом случае, при откате миграции, будут удалены не только таблицы, но и все соответствующие ENUM-типов.
+
+Важно: Используйте этот метод только тогда, когда необходимо удалить сами ENUM-типы,
+чтобы не допустить ненужного удаления, если типы могут понадобиться в других частях приложения.
+
+###############################################################################################
+
+Явное управление ENUM через Alembic
+Если вы хотите использовать ENUM, но при этом иметь полный контроль над миграциями, вы можете явно определить его в Alembic:
+
+# В миграции Alembic
+op.execute("CREATE TYPE professionenum AS ENUM ('MANAGER', 'DEVELOPER')")
+op.add_column('table_name', sa.Column('profession', sa.Enum('MANAGER', 'DEVELOPER', name='professionenum'), nullable=False))
+
+Это дает вам полный контроль над ENUM, но требует дополнительных усилий.
+
+###############################################################################################
+
+Как это работает в базе данных?
+Если вы используете native_enum=False, то в базе данных поле будет определено как строка. Например:
+
+CREATE TABLE house (
+    id SERIAL PRIMARY KEY,
+    building_type VARCHAR(255) NOT NULL
+);
+В этом случае:
+Значения APARTMENT, HOUSE, STUDIO будут храниться как строки.
+SQLAlchemy автоматически преобразует их в объекты HouseTypeEnum при работе с данными на стороне Python.
+
+Пример использования
+Модель:
+from sqlalchemy import Enum
+from sqlalchemy.orm import Mapped, mapped_column
+from enum import Enum as PyEnum
+
+class HouseTypeEnum(PyEnum):
+    APARTMENT = "APARTMENT"
+    HOUSE = "HOUSE"
+    STUDIO = "STUDIO"
+
+class House(Base):
+    __tablename__ = "house"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    building_type: Mapped[HouseTypeEnum] = mapped_column(
+        Enum(HouseTypeEnum, native_enum=False, length=255)
+    )
+
+Работа с данными:
+# Создание записи
+new_house = House(building_type=HouseTypeEnum.APARTMENT)
+session.add(new_house)
+session.commit()
+
+# Чтение данных
+house = session.query(House).first()
+print(house.building_type)  # HouseTypeEnum.APARTMENT
+
+
+Когда использовать native_enum=True?
+Хотя native_enum=False удобен, есть случаи, когда лучше использовать native_enum=True:
+    Строгая типизация на уровне базы данных :
+        Если вы хотите, чтобы база данных строго проверяла допустимые значения для поля.
+    Оптимизация производительности :
+        ENUM-типы могут быть немного быстрее, чем строки, особенно если они используются часто.
+    Специфические требования к базе данных :
+        Некоторые базы данных (например, PostgreSQL) предоставляют дополнительные возможности для работы с ENUM.
+
+
+Советы
+Используйте native_enum=False, если:
+    Вы часто изменяете значения перечислений.
+    Вам нужна совместимость с различными СУБД.
+    Вы хотите избежать проблем с миграциями.
+Используйте native_enum=True, если:
+    Вам важна строгая типизация на уровне базы данных.
+    Вы уверены, что значения перечисления не будут часто меняться.
+
+
+
+
