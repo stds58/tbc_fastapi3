@@ -8,7 +8,7 @@ from sqlalchemy.orm import joinedload, class_mapper, declarative_base
 from fastapi import HTTPException
 from pydantic import BaseModel
 from app.dictionaries.models import Product, Manufacturer, DimensionUnit, Subcategory, Category
-from app.dictionaries.schemas import SManufacturerFilter, SProductFilter
+from app.dictionaries.schemas import SManufacturer, SManufacturerFilter, SProductFilter
 from app.database import async_session_maker
 from app.session_maker import connection
 import logging
@@ -47,7 +47,8 @@ class BaseDAO(Generic[ModelType, FilterType]):
         results = result.unique().scalars().all()  # Получаем все записи
         if len(results) == 0:  # Проверяем количество найденных записей
             raise HTTPException(status_code=404, detail=f"Найдено 0 записей")
-        return results
+        #return results
+        return [cls.pydantic_model.model_validate(obj, from_attributes=True) for obj in results]
 
     @classmethod
     async def find_all_stream(cls, session: AsyncSession, options: Optional[List[Any]] = None,filters: FilterType = None) -> AsyncGenerator[ModelType, None]:
@@ -168,6 +169,7 @@ class BaseDAO(Generic[ModelType, FilterType]):
 
 class ManufacturerDAO(BaseDAO[Manufacturer, SManufacturerFilter]):
     model = Manufacturer
+    pydantic_model = SManufacturer
 
 class ProductDAO(BaseDAO[Product, SProductFilter]):
     model = Product

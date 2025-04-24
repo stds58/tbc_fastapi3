@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Все производители</title>
+</head>
+<body>
+    <h1>Список производителей</h1>
+    <div>
+        {% for manufacturer in manufacturers %}
+        <div>
+            <h2>id: {{ manufacturer.id }}</h2>
+            <p>Имя manufacturer_name_alias: {{ manufacturer.manufacturer_name_alias }}</p>
+            <p>Полное имя full_name: {{ manufacturer.full_name }}</p>
+            <p>manufacturer_name: {{ manufacturer.manufacturer_name }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
+

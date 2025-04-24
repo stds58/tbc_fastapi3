@@ -3,7 +3,7 @@ from app.dictionaries.router import router as router_manufacturers
 from app.users.router import router as router_users
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from exceptions import http_exception_handler,sqlalchemy_error_handler,integrity_error_handler
-
+from app.pages.router import router as router_pages
 
 
 app = FastAPI()
@@ -20,6 +20,7 @@ def home_page():
 
 app.include_router(router_users)
 app.include_router(router_manufacturers)
+app.include_router(router_pages)
 
 
 

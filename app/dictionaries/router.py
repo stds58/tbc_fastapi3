@@ -41,7 +41,7 @@ async def generate_data(session, filters: Optional[SManufacturerFilter] = None):
         yield pydantic_record.model_dump_json() + "\n" # Каждая запись в формате JSON, разделенная новой строкой
 
 @router.get("/manufacturers/stream/download", summary="Потоковая передача данных о производителях")
-async def get_manufacturers(request_body: SManufacturerFilter = Depends()):
+async def get_manufacturers_stream_download(request_body: SManufacturerFilter = Depends()):
     async with get_session_with_isolation(async_session_maker, isolation_level="READ COMMITTED") as session:
         return StreamingResponse(
             generate_data(session, filters=request_body),
@@ -50,7 +50,7 @@ async def get_manufacturers(request_body: SManufacturerFilter = Depends()):
         )
 
 @router.get("/manufacturers/stream/", summary="Потоковая передача данных о производителях")
-async def get_manufacturers(request_body: SManufacturerFilter = Depends()):
+async def get_manufacturers_stream(request_body: SManufacturerFilter = Depends()):
     async with get_session_with_isolation(async_session_maker, isolation_level="READ COMMITTED") as session:
         records = []
         async for record in ManufacturerDAO.find_all_stream(session=session, filters=request_body):
@@ -63,6 +63,8 @@ async def get_manufacturers(request_body: SManufacturerFilter = Depends()):
 @router.get("/manufacturers/", summary="Получить всех производителей", response_model=List[SManufacturer])
 async def get_all_manufacturers(request_body: SManufacturerFilter = Depends()) -> list[SManufacturer]:
     return await ManufacturerDAO.find_all_opt(options=None,filters=request_body)
+    # manufacturers = await ManufacturerDAO.find_all_opt(options=None, filters=request_body)
+    # return [manufacturer.model_dump(by_alias=True) for manufacturer in manufacturers]
 
 @router.get("/manufacturers/{id}", summary="Получить одого производителя")
 async def get_manufacturer_by_filter(request_body: SManufacturerFilter = Depends()) -> SManufacturer | dict:
