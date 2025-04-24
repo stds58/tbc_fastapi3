@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.responses import Response
+from app.exceptions import IncorrectEmailOrPasswordException
 from app.users.auth import get_password_hash, create_access_token, authenticate_user, get_current_user
 from app.users.dao import UsersDAO
 from app.users.models import User
@@ -13,7 +14,7 @@ router = APIRouter(prefix='/auth', tags=['Auth'])
 
 @router.post("/register/")
 async def register_user(user_data: SUserRegister) -> dict:
-    user = await UsersDAO.find_one_or_none(email=user_data.email)
+    user = await UsersDAO.find_one_or_none(options=None,filters={"email": user_data.email})
     if user:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -25,7 +26,16 @@ async def register_user(user_data: SUserRegister) -> dict:
     return {'message': 'Вы успешно зарегистрированы!'}
 
 
-@router.post("/login/")
+# @router.get("/manufacturers/{id}", summary="Получить одого производителя")
+# async def get_manufacturer_by_filter(request_body: SManufacturerFilter = Depends()) -> SManufacturer | dict:
+#     result = await ManufacturerDAO.find_one_or_none(options=None,filters=request_body)
+#     if result is None:
+#         return {'message': f'Производитель с указанными вами параметрами не найден!'}
+#     return result
+
+
+
+@router.post("/login2/")
 async def auth_user(response: Response, user_data: SUserAuth):
     check = await authenticate_user(email=user_data.email, password=user_data.password)
     if check is None:
@@ -40,6 +50,18 @@ async def auth_user(response: Response, user_data: SUserAuth):
     # такие как токены аутентификации (access_token), не могут быть скомпрометированы через атаки XSS (межсайтовый скриптинг).
     # Таким образом, флаг httponly=True помогает защитить данные пользователя от несанкционированного доступа и использования.
     return {'access_token': access_token, 'refresh_token': None}
+
+@router.post("/login/")
+async def auth_user(response: Response, user_data: SUserAuth):
+    check = await authenticate_user(email=user_data.email, password=user_data.password)
+    if check is None:
+        raise IncorrectEmailOrPasswordException
+    access_token = create_access_token({"sub": str(check.id)})
+    response.set_cookie(key="users_access_token", value=access_token, httponly=True)
+    return {'ok': True, 'access_token': access_token, 'refresh_token': None, 'message': 'Авторизация успешна!'}
+
+
+
 
 
 @router.post("/logout/")

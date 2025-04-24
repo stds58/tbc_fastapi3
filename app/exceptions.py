@@ -65,3 +65,8 @@ async def sqlalchemy_error_handler(request: Request, exc: SQLAlchemyError):
         content={"error": "Внутренняя ошибка сервера"},
     )
 
+class IncorrectEmailOrPasswordException(HTTPException):
+    def __init__(self, detail: str = "Неверный email или пароль", status_code: int = 401):
+        super().__init__(status_code=status_code, detail=detail)
+
+

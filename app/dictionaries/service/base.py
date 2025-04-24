@@ -68,7 +68,12 @@ class BaseDAO(Generic[ModelType, FilterType]):
     async def find_one_or_none(cls, session: AsyncSession, options: Optional[List[Any]] = None, filters: FilterType = None) -> Optional[ModelType]:
         query = select(cls.model)
         if filters is not None:
-            filter_dict = filters.model_dump(exclude_unset=True)
+            if isinstance(filters, dict):
+                filter_dict = filters  # Если filters уже словарь, используем его напрямую
+            else:
+                # Если filters — это Pydantic-модель, преобразуем её в словарь
+                filter_dict = filters.model_dump(exclude_unset=True)
+            #filter_dict = filters.model_dump(exclude_unset=True)
             filter_dict = {key: value for key, value in filter_dict.items() if value is not None}
             query = query.filter_by(**filter_dict)
         if options:

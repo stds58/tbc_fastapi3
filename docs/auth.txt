@@ -38,7 +38,7 @@ https://habr.com/ru/articles/591985/
 https://www.openpolicyagent.org
 В качестве модуля авторизации я буду использовать OPA
 
-
-
+https://habr.com/ru/companies/ppr/articles/904052/
+Vouch Proxy для OAuth2 при авторизации пользователей в нагруженных системах
 
 
