@@ -10,7 +10,7 @@ from app.dictionaries.service.base import ManufacturerDAO, ProductDAO
 from app.dictionaries.schemas import SManufacturer, SManufacturerAdd, SManufacturerUpdate, SManufacturerUpdateById, SManufacturerFilter, SProduct, SProductAdd
 from app.dictionaries.filtr import FiltrProduct, FiltrManufacturer
 from app.session_maker import get_session_with_isolation
-import json
+
 
 
 # from  fastapi import APIRouter:
@@ -38,8 +38,7 @@ async def generate_data(session, filters: Optional[SManufacturerFilter] = None):
     """Генератор для потоковой передачи данных."""
     async for record in ManufacturerDAO.find_all_stream(session=session, filters=filters):  # Используем await
         pydantic_record = SManufacturer.model_validate(record)  # Преобразуем ORM-объект в Pydantic
-        yield json.dumps(pydantic_record.model_dump()) + "\n"  # Каждая запись в формате JSON, разделенная новой строкой
-
+        yield pydantic_record.model_dump_json() + "\n" # Каждая запись в формате JSON, разделенная новой строкой
 
 @router.get("/manufacturers/stream/download", summary="Потоковая передача данных о производителях")
 async def get_manufacturers(request_body: SManufacturerFilter = Depends()):
