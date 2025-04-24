@@ -3,7 +3,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
-from typing import List
+from typing import List, Optional
 from app.database import async_session_maker
 from app.dictionaries.models import Product, Manufacturer, DimensionUnit, Subcategory, Category
 from app.dictionaries.service.base import ManufacturerDAO, ProductDAO
@@ -34,27 +34,29 @@ router = APIRouter(prefix='/dictionaries', tags=['справочник прои�
 # # Список студентов возвращается в виде JSON-ответа. FastAPI автоматически преобразует его в формат JSON.
 
 
-async def generate_data(session):
+async def generate_data(session, filters: Optional[SManufacturerFilter] = None):
     """Генератор для потоковой передачи данных."""
-    async for record in ManufacturerDAO.find_all_stream(session=session):  # Используем await
-        yield json.dumps(record.to_dict()) + "\n"  # Каждая запись в формате JSON, разделенная новой строкой
+    async for record in ManufacturerDAO.find_all_stream(session=session, filters=filters):  # Используем await
+        pydantic_record = SManufacturer.model_validate(record)  # Преобразуем ORM-объект в Pydantic
+        yield json.dumps(pydantic_record.model_dump()) + "\n"  # Каждая запись в формате JSON, разделенная новой строкой
 
 
 @router.get("/manufacturers/stream/download", summary="Потоковая передача данных о производителях")
-async def get_manufacturers():
+async def get_manufacturers(request_body: SManufacturerFilter = Depends()):
     async with get_session_with_isolation(async_session_maker, isolation_level="READ COMMITTED") as session:
         return StreamingResponse(
-            generate_data(session),
+            generate_data(session, filters=request_body),
             media_type="application/json",
             headers={"Content-Disposition": "attachment; filename=manufacturers.json"}
         )
 
 @router.get("/manufacturers/stream/", summary="Потоковая передача данных о производителях")
-async def get_manufacturers():
+async def get_manufacturers(request_body: SManufacturerFilter = Depends()):
     async with get_session_with_isolation(async_session_maker, isolation_level="READ COMMITTED") as session:
         records = []
-        async for record in ManufacturerDAO.find_all_stream(session=session):
-            records.append(record.to_dict())
+        async for record in ManufacturerDAO.find_all_stream(session=session, filters=request_body):
+            pydantic_record = SManufacturer.model_validate(record)  # Преобразуем ORM-объект в Pydantic
+            records.append(pydantic_record.model_dump())  # Преобразуем в словарь
         if not records:
             raise HTTPException(status_code=404, detail="Найдено 0 записей")
         return records

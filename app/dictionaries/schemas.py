@@ -2,7 +2,7 @@
 from datetime import datetime, date
 from typing import Optional, List
 import re
-from pydantic import BaseModel, ConfigDict, Field, EmailStr, field_validator
+from pydantic import BaseModel, ConfigDict, Field, EmailStr, field_validator, computed_field
 
 
 
@@ -22,6 +22,14 @@ class SManufacturer(BaseModel):
     manufacturer_name: str = Field(..., description="производитель")
     is_valid: bool = Field(..., description="производитель работает")
     #product: List[Optional['SProduct']] = Field(None, description="вложенная схема Product")
+
+    @computed_field
+    def full_name(self) -> str:
+        return f"{self.manufacturer_name} - {self.is_valid}"
+
+    model_config = {
+        "from_attributes": True
+    }
 
     # @field_validator("phone_number")
     # def validate_phone_number(cls, value):
