@@ -1,3 +1,6 @@
+https://habr.com/ru/companies/amvera/articles/849836/
+https://habr.com/ru/companies/amvera/articles/850470/
+https://habr.com/ru/companies/amvera/articles/855740/
 
 Core и ORM
 Core — это низкоуровневый подход, который позволяет выполнять запросы с использованием SQL-выражений,

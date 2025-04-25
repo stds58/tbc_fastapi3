@@ -16,11 +16,12 @@ pip install fastapi-pagination
 # работа с бд
 pip install sqlalchemy #орм
 pip install asyncpg #асинхронный драйвер для PostgreSQL, который позволяет использовать возможности асинхронного программирования с SQLAlchemy
-pip install -U pydantic[all] #-U — обновляет Pydantic до последней версии, если он уже установлен,
+pip install -U pydantic[all] #валидация данных
+                             #-U — обновляет Pydantic до последней версии, если он уже установлен,
                              #или просто установит последнюю доступную версию, если Pydantic отсутствует.
                              #[all] — этот флаг добавляет всевозможные дополнительные модули и валидаторы,
                              #которые могут быть полезны в проекте, такие как валидатор email-адресов и другие расширенные функции.
-pip install pydantic-settings #отдельная библиотека, которую мы будем использовать для хранения настроек.
+pip install pydantic-settings #работа с переменными окружения
 pip install pydantic-settings python-dotenv
 pip install alembic #миграции
 alembic init alembic
@@ -33,6 +34,21 @@ pip install psycopg2-binary #синхронный драйвер для PostgreS
 sqlacodegen postgresql://admin:prod@192.168.28.1:6003/postgresbriz > appbriz/models.py
 
 ###################################################################
+#https://habr.com/ru/companies/amvera/articles/866200/
+#https://habr.com/ru/articles/721186/comments/
+#FastAPI и Celery – это всегда, подчеркиваю, всегда разные приложения,
+#которые взаимодействуют между собой посредством брокеров и очередей задач.
+#всегда в этой связке будет ещё одно приложение — брокер.
+#Это тот, кто сохраняет задачи и затем передает их на реализацию.
+#В качестве брокеров, как правило, выступает Redis (нереляционная база данных) или
+#RabbitMQ (система, которая позволяет приложениям обмениваться сообщениями надежно и эффективно)
+#Следовательно, предстоит поднимать минимум 3 приложения (FastAPI, Celery и, например, Redis).
+#либо FastAPI + Arq или Dramatiq + Redis
+
+loguru #логирование https://habr.com/ru/articles/454436/
+locust #нагрузочное тестирование
+
+###################################################################
 pip install httpie #текстовый веб-клиент HTTPie (https://httpie.io)
 pip install requests #пакет синхронного веб-клиента Requests (https://requests.readthedocs.io)
 pip install httpx #пакет синхронного/асинхронного веб-клиента HTTPX (https://www.pythonhttpx.org)
@@ -42,6 +58,7 @@ pip install mypy #статический анализатор
 pip install watchfiles
 pip install opentelemetry-api
 pip install opentelemetry-sdk
+pip install faker
 
 ###################################################################
 

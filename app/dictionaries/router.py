@@ -80,7 +80,7 @@ async def get_manufacturer_by_id(id: int = Path(..., description="ID произ�
         raise HTTPException(status_code=404, detail="Производитель с указанным ID не найден")
     return result
 
-@router.post("/manufacturers/add/")
+@router.post("/manufacturers/add/") # include_in_schema=False исключить из свагера
 async def register_user(manufacturer: SManufacturerAdd) -> dict:
     check = await ManufacturerDAO.add(**manufacturer.model_dump())
     if check:
