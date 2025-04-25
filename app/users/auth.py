@@ -23,7 +23,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def create_access_token(data: dict) -> str:
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(minutes=1) #timedelta(days=30)
+    expire = datetime.now(timezone.utc) + timedelta(minutes=1) #timedelta(minutes=1)   timedelta(days=30)
     to_encode.update({"exp": expire})
     auth_data = get_auth_data()
     encode_jwt = jwt.encode(to_encode, auth_data['secret_key'], algorithm=auth_data['algorithm'])
@@ -63,7 +63,8 @@ async def get_current_user(token: str = Depends(get_token)):
         raise NoUserIdException()
         #raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Не найден ID пользователя')
 
-    user = await UsersDAO.find_one_or_none(id=int(user_id))
+    #user = await UsersDAO.find_one_or_none(id=int(user_id))
+    user = await UsersDAO.find_one_or_none(filters={"id": int(user_id)})
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='User not found')
     return user

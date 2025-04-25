@@ -1,9 +1,9 @@
 from typing import List, Optional
-from fastapi import APIRouter, Request, Depends
+from fastapi import APIRouter, Request, Depends, HTTPException
 from fastapi.templating import Jinja2Templates
 from app.dictionaries.router import get_all_manufacturers
 from app.dictionaries.schemas import SManufacturer, SManufacturerAdd, SManufacturerUpdate, SManufacturerUpdateById, SManufacturerFilter, SProduct, SProductAdd
-from app.users.router import register_user
+from app.users.router import register_user, get_me, auth_user
 from app.users.schemas import SUserRegister, SUserAuth
 
 
@@ -32,11 +32,14 @@ async def register(request: Request):
     )
 
 @router.get('/login')
-async def register(request: Request):
+async def login(request: Request):
     return templates.TemplateResponse(
         name='login.html',
         context={'request': request}
     )
 
+@router.get('/profile')
+async def get_my_profile(request: Request, profile=Depends(get_me)):
+    return templates.TemplateResponse(name='profile.html', context={'request': request, 'profile': profile})
 
 

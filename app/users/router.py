@@ -61,9 +61,6 @@ async def auth_user(response: Response, user_data: SUserAuth):
     return {'ok': True, 'access_token': access_token, 'refresh_token': None, 'message': 'Авторизация успешна!'}
 
 
-
-
-
 @router.post("/logout/")
 async def logout_user(response: Response):
     response.delete_cookie(key="users_access_token")

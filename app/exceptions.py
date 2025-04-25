@@ -2,9 +2,13 @@ from fastapi import HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 import logging
+from fastapi.templating import Jinja2Templates
+
 
 
 logger = logging.getLogger(__name__)
+templates = Jinja2Templates(directory='templates')
+
 
 # Пользовательские исключения
 class CustomNotFoundException(HTTPException):
@@ -38,10 +42,23 @@ class ForbiddenException(HTTPException):
 
 # Обработчики исключений
 async def http_exception_handler(request: Request, exc: HTTPException):
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"error": exc.detail},
-    )
+    if exc.status_code == 401:  # Ошибка аутентификации
+        return templates.TemplateResponse(
+            name='login.html',
+            context={'request': request}
+        )
+        # return templates.TemplateResponse(
+        #     name='error.html',
+        #     context={'request': request,
+        #              'error_message': "JWT-токен отсутствует или не валиден",
+        #              'login_url': request.url_for('login')  # Генерация URL для страницы входа
+        #              }
+        # )
+    else:
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"error": exc.detail},
+        )
 
 async def integrity_error_handler(request: Request, exc: IntegrityError):
     logger.error(f"Ошибка целостности данных: {exc.orig}")
