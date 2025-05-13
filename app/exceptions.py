@@ -11,9 +11,6 @@ logger = logging.getLogger(__name__)
 BASE_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = Path(__file__).parent.parent
 templates = Jinja2Templates(directory=PROJECT_DIR / "app/templates")
-searchpath = templates.env.loader.searchpath
-# Если нужно как строку (например, первый путь)
-print("Search path: ====", searchpath[0])
 
 
 # Пользовательские исключения
