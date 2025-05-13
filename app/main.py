@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from app.dictionaries.router import router as router_manufacturers
 from app.users.router import router as router_users
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from exceptions import http_exception_handler,sqlalchemy_error_handler,integrity_error_handler
+from app.exceptions import http_exception_handler,sqlalchemy_error_handler,integrity_error_handler
 from app.pages.router import router as router_pages
 
 
