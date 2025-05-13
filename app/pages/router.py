@@ -5,13 +5,25 @@ from app.dictionaries.router import get_all_manufacturers
 from app.dictionaries.schemas import SManufacturer, SManufacturerAdd, SManufacturerUpdate, SManufacturerUpdateById, SManufacturerFilter, SProduct, SProductAdd
 from app.users.router import register_user, get_me, auth_user
 from app.users.schemas import SUserRegister, SUserAuth
+from pathlib import Path
 
 
 # https://habr.com/ru/articles/831386/
 
+BASE_DIR = Path(__file__).resolve().parent
+PROJECT_DIR = Path(__file__).parent.parent
 router = APIRouter(prefix='/pages', tags=['Фронтенд'])
-templates = Jinja2Templates(directory='templates')
+templates = Jinja2Templates(directory=PROJECT_DIR / "templates")
+# Получаем список путей, где ищутся шаблоны
+searchpath = templates.env.loader.searchpath
+# Если нужно как строку (например, первый путь)
+#print("Search path:", searchpath[0])
 
+@router.get('/list-templates')
+def list_templates(request: Request):
+    template_names = templates.env.list_templates()
+    print('template_names ',template_names)
+    return {"available_templates": template_names}
 
 @router.get('/manufacturers')
 async def get_manufacturers_html(request: Request, manufacturers: List[SManufacturer] = Depends(get_all_manufacturers)):

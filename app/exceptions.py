@@ -3,11 +3,17 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 import logging
 from fastapi.templating import Jinja2Templates
-
+from pathlib import Path
 
 
 logger = logging.getLogger(__name__)
-templates = Jinja2Templates(directory='templates')
+
+BASE_DIR = Path(__file__).resolve().parent
+PROJECT_DIR = Path(__file__).parent.parent
+templates = Jinja2Templates(directory=PROJECT_DIR / "app/templates")
+searchpath = templates.env.loader.searchpath
+# Если нужно как строку (например, первый путь)
+print("Search path: ====", searchpath[0])
 
 
 # Пользовательские исключения
@@ -34,6 +40,7 @@ class NoJwtException(HTTPException):
 class NoUserIdException(HTTPException):
     def __init__(self, detail: str = "Идентификатор пользователя отсутствует"):
         super().__init__(status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
+
 
 class ForbiddenException(HTTPException):
     def __init__(self, detail: str = "Доступ запрещен"):

@@ -1,5 +1,6 @@
 import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from functools import lru_cache
 
 
 class Settings(BaseSettings):
@@ -10,6 +11,13 @@ class Settings(BaseSettings):
     DB_PASSWORD: str
     SECRET_KEY: str
     ALGORITHM: str
+
+    # Настройки Keycloak
+    keycloak_url: str
+    keycloak_realm: str
+    keycloak_client_id: str
+    keycloak_client_secret: str
+
     model_config = SettingsConfigDict(
         env_file=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
     )
@@ -17,6 +25,7 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
+#print(settings.model_dump())
 
 def get_db_url():
     # print("DB_HOST:", settings.DB_HOST)

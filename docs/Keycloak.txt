@@ -1,0 +1,32 @@
+
+1 Установка зависимостей
+pip install fastapi uvicorn python-jose[cryptography] python-multipart requests
+
+2 Запуск Keycloak (если локально)
+Можно запустить Keycloak через Docker:
+
+docker run -p 8080:8080 \
+  -e KEYCLOAK_ADMIN=admin \
+  -e KEYCLOAK_ADMIN_PASSWORD=admin \
+  quay.io/keycloak/keycloak:latest \
+  start-dev
+Открой: http://localhost:8080
+Залогинься:
+Логин: admin
+Пароль: admin
+
+3 Создай realm и клиента (client), например:
+Realm: tbcrealm
+Client ID: fastapiapp
+Включи режим Standard Flow и добавь http://localhost:8000/docs/oauth2-redirect в Valid Redirect URIs.
+
+http://localhost:8080/admin/realms/fastapiapp/clients
+http://localhost:8080/admin/tbcrealm/console/#/tbcrealm/clients
+
+
+
+docker-compose down
+docker-compose down -v
+docker-compose up -d
+
+

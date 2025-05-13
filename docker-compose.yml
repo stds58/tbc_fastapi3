@@ -28,7 +28,8 @@ services:
                -c wal_buffers=16MB
                -c default_statistics_target=100
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres_user -d postgres_db" ]
+      #test: [ "CMD-SHELL", "pg_isready -U postgres_user -d postgres_db" ]
+      test: [ "CMD-SHELL", "pg_isready -U admin -d fast_api" ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -36,6 +37,51 @@ services:
     tty: true
     stdin_open: true
 
+  postgres_keycloak:
+    image: postgres:latest
+    container_name: postgres_keycloak
+    environment:
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+      POSTGRES_DB: keycloak
+    ports:
+      - "6434:5432"
+    volumes:
+      - pgdata_keycloak:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U keycloak -d keycloak" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak
+    environment:
+      KC_DB: postgres
+      KC_DB_URL_HOST: postgres_keycloak
+      KC_DB_NAME: keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+      # Optional: если будешь делать кастомные темы или provider'ы
+      # volumes:
+      #   - ./themes:/opt/keycloak/themes
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres_keycloak:
+        condition: service_healthy
+    command:
+      - start-dev
+    restart: unless-stopped
+
 volumes:
   pgdata:
+    driver: local
+  pgdata_keycloak:
     driver: local

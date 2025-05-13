@@ -1,10 +1,11 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.staticfiles import StaticFiles
 from app.dictionaries.router import router as router_manufacturers
 from app.users.router import router as router_users
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from app.exceptions import http_exception_handler,sqlalchemy_error_handler,integrity_error_handler
 from app.pages.router import router as router_pages
+from app.keycloak.keycloak import get_keycloak_manager, User
 
 
 app = FastAPI()
@@ -25,8 +26,13 @@ app.include_router(router_users)
 app.include_router(router_manufacturers)
 app.include_router(router_pages)
 
+@app.get("/protected")
+async def protected_route(user: User = Depends(get_keycloak_manager().get_user_from_token)):
+    return {"message": "You are authenticated", "user": user}
 
-
+# @app.get("/protected")
+# async def protected_route():
+#     return {"message": "You are authenticated"}
 
 if __name__ == "__main__":
     import uvicorn
