@@ -6,10 +6,15 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from app.exceptions import http_exception_handler,sqlalchemy_error_handler,integrity_error_handler
 from app.pages.router import router as router_pages
 from app.keycloak.keycloak import get_keycloak_manager, User
+from starlette.middleware.sessions import SessionMiddleware
+from app.config import settings
+
 
 
 app = FastAPI()
 
+# Для работы с сессиями (OAuth нужен session middleware)
+app.add_middleware(SessionMiddleware, secret_key=settings.SESSION_MIDDLEWARE_SECRET_KEY)
 
 # Регистрация обработчиков исключений
 app.add_exception_handler(HTTPException, http_exception_handler)
@@ -36,7 +41,7 @@ async def protected_route(user: User = Depends(get_keycloak_manager().get_user_f
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", reload=True)
+    uvicorn.run("main:app", reload=True)
     # C:\tbc_fastapi\.venv\Scripts\uvicorn.exe main:app
 
 

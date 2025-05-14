@@ -3,7 +3,7 @@ from fastapi import APIRouter, Request, Depends, HTTPException
 from fastapi.templating import Jinja2Templates
 from app.dictionaries.router import get_all_manufacturers
 from app.dictionaries.schemas import SManufacturer, SManufacturerAdd, SManufacturerUpdate, SManufacturerUpdateById, SManufacturerFilter, SProduct, SProductAdd
-from app.users.router import register_user, get_me, auth_user
+from app.users.router import register_user, get_me , get_current_user #, auth_user, login_oauth
 from app.users.schemas import SUserRegister, SUserAuth
 from pathlib import Path
 
@@ -43,15 +43,23 @@ async def register(request: Request):
         context={'request': request}
     )
 
-@router.get('/login')
-async def login(request: Request):
-    return templates.TemplateResponse(
-        name='login.html',
-        context={'request': request}
-    )
+# @router.get('/login_oauth')
+# async def login(request: Request):
+#     return templates.TemplateResponse(
+#         name='login_oauth.html',
+#         context={'request': request}
+#     )
 
-@router.get('/profile')
-async def get_my_profile(request: Request, profile=Depends(get_me)):
-    return templates.TemplateResponse(name='profile.html', context={'request': request, 'profile': profile})
+@router.get("/login")
+async def login_oauth_page(request: Request):
+    return templates.TemplateResponse("login_oauth.html", {"request": request})
+
+# @router.get('/profile')
+# async def get_my_profile(request: Request, profile=Depends(get_me)):
+#     return templates.TemplateResponse(name='profile.html', context={'request': request, 'profile': profile})
+
+@router.get("/profile")
+async def profile_page(request: Request, user: dict = Depends(get_current_user)):
+    return templates.TemplateResponse(name="profile.html", context={"request": request, "user": user})
 
 

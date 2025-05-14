@@ -11,12 +11,11 @@ class Settings(BaseSettings):
     DB_PASSWORD: str
     SECRET_KEY: str
     ALGORITHM: str
-
-    # Настройки Keycloak
-    keycloak_url: str
-    keycloak_realm: str
-    keycloak_client_id: str
-    keycloak_client_secret: str
+    SESSION_MIDDLEWARE_SECRET_KEY: str
+    KEYCLOAK_URL: str
+    KEYCLOAK_REALM: str
+    KEYCLOAK_CLIENT_ID: str
+    KEYCLOAK_CLIENT_SECRET: str
 
     model_config = SettingsConfigDict(
         env_file=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")

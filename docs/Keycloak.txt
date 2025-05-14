@@ -18,7 +18,7 @@ docker run -p 8080:8080 \
 3 Создай realm и клиента (client), например:
 Realm: tbcrealm
 Client ID: fastapiapp
-Включи режим Standard Flow и добавь http://localhost:8000/docs/oauth2-redirect в Valid Redirect URIs.
+Включи режим Standard Flow и добавь http://localhost:8000/auth/callback/ в Valid Redirect URIs.
 
 http://localhost:8080/admin/realms/fastapiapp/clients
 http://localhost:8080/admin/tbcrealm/console/#/tbcrealm/clients

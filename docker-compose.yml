@@ -64,8 +64,8 @@ services:
       KC_DB_NAME: keycloak
       KC_DB_USERNAME: keycloak
       KC_DB_PASSWORD: keycloak
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_ADMIN: admin@admin.rr
+      KEYCLOAK_ADMIN_PASSWORD: admin@admin.rr
       KC_HEALTH_ENABLED: "true"
       KC_METRICS_ENABLED: "true"
       # Optional: если будешь делать кастомные темы или provider'ы
