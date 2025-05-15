@@ -27,6 +27,8 @@ http://localhost:8080/admin/tbcrealm/console/#/tbcrealm/clients
 
 docker-compose down
 docker-compose down -v
+render_tbcrealm_json.py
 docker-compose up -d
+
 
 

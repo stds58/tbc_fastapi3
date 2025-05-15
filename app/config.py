@@ -24,6 +24,8 @@ class Settings(BaseSettings):
     KEYCLOAK_ADMIN_PASSWORD: str
     KEYCLOAK_PORT: str
     FRONT_URL: str
+    SSO_SESSION_MAX_LIFESPAN: int
+    SSO_SESSION_IDLE_TIMEOUT: int
 
     model_config = SettingsConfigDict(
         env_file=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")

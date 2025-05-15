@@ -1,0 +1,39 @@
+{
+  "realm": "${KEYCLOAK_REALM}",
+  "enabled": true,
+  "users": [],
+  "roles": {},
+  "clients": [
+    {
+      "clientId": "${KEYCLOAK_CLIENT_ID}",
+      "name": "${KEYCLOAK_CLIENT_ID}",
+      "redirectUris": ["${FRONT_URL}/auth/callback/", "${FRONT_URL}/pages/login"],
+      "webOrigins": ["${FRONT_URL}"],
+      "clientAuthenticatorType": "client-secret",
+      "secret": "${KEYCLOAK_CLIENT_SECRET}",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "frontchannelLogout": true,
+      "baseUrl": "${FRONT_URL}"
+    }
+  ],
+  "ssoSessionMaxLifespan": ${SSO_SESSION_MAX_LIFESPAN},
+  "ssoSessionIdleTimeout": ${SSO_SESSION_IDLE_TIMEOUT},
+  "smtpServer": {},
+  "defaultGroups": [],
+  "identityProviders": [],
+  "internationalizationEnabled": true,
+  "supportedLocales": ["ru"],
+  "loginTheme": "",
+  "accountTheme": "",
+  "adminTheme": "",
+  "emailTheme": "",
+  "registrationAllowed": true,
+  "rememberMe": true,
+  "resetPasswordAllowed": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false
+}
