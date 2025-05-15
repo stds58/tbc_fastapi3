@@ -16,10 +16,20 @@ class Settings(BaseSettings):
     KEYCLOAK_REALM: str
     KEYCLOAK_CLIENT_ID: str
     KEYCLOAK_CLIENT_SECRET: str
+    KEYCLOAK_POSTGRES_USER: str
+    KEYCLOAK_POSTGRES_PASSWORD: str
+    KEYCLOAK_POSTGRES_DB: str
+    KEYCLOAK_DB_PORT: str
+    KEYCLOAK_ADMIN: str
+    KEYCLOAK_ADMIN_PASSWORD: str
+    KEYCLOAK_PORT: str
+    FRONT_URL: str
 
     model_config = SettingsConfigDict(
         env_file=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
     )
+
+
 
 
 settings = Settings()

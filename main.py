@@ -10,7 +10,6 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.config import settings
 
 
-
 app = FastAPI()
 
 # Для работы с сессиями (OAuth нужен session middleware)

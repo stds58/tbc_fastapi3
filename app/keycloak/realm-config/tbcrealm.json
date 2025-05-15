@@ -1,0 +1,39 @@
+{
+  "realm": "tbcrealm",
+  "enabled": true,
+  "users": [],
+  "roles": {},
+  "clients": [
+    {
+      "clientId": "fastapiapp",
+      "name": "fastapiapp",
+      "redirectUris": ["http://localhost:8000/auth/callback/", "http://localhost:8000/pages/login"],
+      "webOrigins": ["http://localhost:8000"],
+      "clientAuthenticatorType": "client-secret",
+      "secret": "pPN7UstOmkp7KCceF0rZDBTgPTjCvyHp",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "frontchannelLogout": true,
+      "baseUrl": "http://localhost:8000"
+    }
+  ],
+  "ssoSessionMaxLifespan": 2592000,
+  "ssoSessionIdleTimeout": 14400,
+  "smtpServer": {},
+  "defaultGroups": [],
+  "identityProviders": [],
+  "internationalizationEnabled": true,
+  "supportedLocales": ["ru"],
+  "loginTheme": "",
+  "accountTheme": "",
+  "adminTheme": "",
+  "emailTheme": "",
+  "registrationAllowed": true,
+  "rememberMe": true,
+  "resetPasswordAllowed": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false
+}

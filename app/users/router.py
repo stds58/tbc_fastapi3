@@ -11,7 +11,9 @@ from app.users.dependencies import get_current_admin_user
 from app.users.service import UserService
 from app.config import settings
 from urllib.parse import quote_plus
-
+import os
+import requests
+import json
 
 
 router = APIRouter(prefix='/auth', tags=['Auth'])
@@ -56,7 +58,7 @@ async def auth_user(response: Response, user_data: SUserAuth):
     response.set_cookie(key="users_access_token", value=access_token, httponly=True)
     return {'ok': True, 'access_token': access_token, 'refresh_token': None, 'message': 'Авторизация успешна!'}
 
-# Создаём OAuth-объект
+
 oauth = OAuth()
 
 oauth.register(
@@ -64,17 +66,17 @@ oauth.register(
     client_id=settings.KEYCLOAK_CLIENT_ID,
     client_secret=settings.KEYCLOAK_CLIENT_SECRET,
     server_metadata_url=f"{settings.KEYCLOAK_URL}/realms/{settings.KEYCLOAK_REALM}/.well-known/openid-configuration",
-    redirect_uri="http://localhost:8000/auth/callback/",
-    client_kwargs={
-        'scope': 'openid profile email'
-    }
+    redirect_uri=f"{settings.FRONT_URL}/auth/callback/",
+    client_kwargs={'scope': 'openid profile email'}
 )
 # Настройка Keycloak
 KEYCLOAK_URL = settings.KEYCLOAK_URL
 KEYCLOAK_REALM = settings.KEYCLOAK_REALM
 KEYCLOAK_CLIENT_ID = settings.KEYCLOAK_CLIENT_ID
 KEYCLOAK_CLIENT_SECRET = settings.KEYCLOAK_CLIENT_SECRET # удалить, если Access Type = public
-
+KEYCLOAK_ADMIN = settings.KEYCLOAK_ADMIN
+KEYCLOAK_ADMIN_PASSWORD = settings.KEYCLOAK_ADMIN_PASSWORD
+MASTER_REALM = "master"
 
 
 @router.get("/login/")
@@ -110,11 +112,11 @@ async def logout_user(response: Response):
 @router.get("/logout/")
 async def logout_user(request: Request, response: Response):
     response.delete_cookie("users_access_token")
-    request.session.clear()
-    post_logout_redirect_uri = "http://localhost:8000/pages/login"
+    #request.session.clear()
+    post_logout_redirect_uri = f"{settings.FRONT_URL}/pages/login"
     encoded_redirect = quote_plus(post_logout_redirect_uri)
     keycloak_logout_url = (
-        f"http://localhost:8080/realms/{KEYCLOAK_REALM}/protocol/openid-connect/logout?"
+        f"{settings.KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/logout?"
         f"post_logout_redirect_uri={post_logout_redirect_uri}&client_id={KEYCLOAK_CLIENT_ID}"
     )
     #return RedirectResponse(url="/pages/login")
