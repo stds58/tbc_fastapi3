@@ -45,9 +45,6 @@ class BaseDAO(Generic[ModelType, FilterType]):
             query = query.options(*options)
         result = await session.execute(query)
         results = result.unique().scalars().all()  # Получаем все записи
-        if len(results) == 0:  # Проверяем количество найденных записей
-            raise HTTPException(status_code=404, detail=f"Найдено 0 записей")
-        #return results
         return [cls.pydantic_model.model_validate(obj, from_attributes=True) for obj in results]
 
     @classmethod

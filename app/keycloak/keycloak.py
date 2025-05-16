@@ -47,13 +47,15 @@ class KeycloakManager:
         token = auth_header.split(" ")[1]
         payload = self.decode_token(token)
 
-        return User(
+        user = User(
             sub=payload.get("sub"),
             username=payload.get("preferred_username"),
             email=payload.get("email"),
             first_name=payload.get("given_name"),
             last_name=payload.get("family_name")
         )
+        print('user ---- ',user)
+        return user
 
 
 @lru_cache()

@@ -1,4 +1,4 @@
-from app.dictionaries.service.base import BaseDAO
+from app.dictionaries.services.base import BaseDAO
 from app.users.models import User
 from app.users.schemas import SUserRegister
 

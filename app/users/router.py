@@ -14,6 +14,8 @@ from urllib.parse import quote_plus
 import os
 import requests
 import json
+import httpx
+
 
 
 router = APIRouter(prefix='/auth', tags=['Auth'])
@@ -81,6 +83,7 @@ MASTER_REALM = "master"
 
 @router.get("/login/")
 async def login_oauth(request: Request):
+    print('2222222222222222')
     redirect_uri = request.url_for("auth_callback")
     try:
         return await oauth.keycloak.authorize_redirect(request, redirect_uri)
@@ -94,14 +97,18 @@ async def auth_callback(request: Request):
         user_info = token.get('userinfo')  # данные пользователя из Keycloak
         access_token = token['access_token']
         request.session["user"] = dict(user_info)
-        response = RedirectResponse(url="/pages/profile")
-        response.set_cookie(key="users_access_token", value=access_token, httponly=True)
+        request.session["access_token"] = access_token
+
+        # Восстанавливаем URL, откуда пришёл пользователь
+        next_url = request.session.pop("redirect_after_login", "/")
+        # Создаем ответ и устанавливаем куки
+        response = RedirectResponse(url=next_url)
+        response.set_cookie(key="users_access_token", value=access_token, httponly=True, path="/")
         return response
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Ошибка аутентификации: {e}")
         #raise HTTPException(status_code=400, detail=f"Ошибка авторизации: {e}")
         #return {"error": str(e)}
-
 
 
 @router.post("/logout-local/")
@@ -112,24 +119,55 @@ async def logout_user(response: Response):
 @router.get("/logout/")
 async def logout_user(request: Request, response: Response):
     response.delete_cookie("users_access_token")
-    #request.session.clear()
+    request.session.clear()
     post_logout_redirect_uri = f"{settings.FRONT_URL}/pages/login"
-    encoded_redirect = quote_plus(post_logout_redirect_uri)
     keycloak_logout_url = (
         f"{settings.KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/logout?"
         f"post_logout_redirect_uri={post_logout_redirect_uri}&client_id={KEYCLOAK_CLIENT_ID}"
     )
-    #return RedirectResponse(url="/pages/login")
     return RedirectResponse(url=keycloak_logout_url)
 
 
 async def get_current_user(request: Request):
     user = request.session.get("user")
     if not user:
-        print("Not authenticated")
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    print('user ', user)
+        # Сохраняем текущий URL для редиректа после логина
+        request.session["redirect_after_login"] = str(request.url)
+        raise HTTPException(status_code=307, detail="Redirect to login", headers={"Location": "/pages/login"})
     return user
+
+async def verify_keycloak_token(request: Request):
+    access_token = request.session.get("access_token")
+    if not access_token:
+        # Нет токена → редирект на логин
+        request.session["redirect_after_login"] = str(request.url)
+        raise HTTPException(
+            status_code=307,
+            detail="Missing token",
+            headers={"Location": "/pages/login"}
+        )
+
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            "http://localhost:8080/realms/tbcrealm/protocol/openid-connect/userinfo",
+            headers={"Authorization": f"Bearer {access_token}"}
+        )
+        #print('access_token ',access_token)
+        #print('response ',response)
+        if response.status_code != 200:
+            # Токен недействителен → очищаем сессию и редиректим
+            request.session.clear()
+            request.session["redirect_after_login"] = str(request.url)
+            raise HTTPException(
+                status_code=307,
+                detail="Token invalid or expired",
+                headers={"Location": "/pages/login"}
+            )
+
+        user_info = response.json()
+        request.session["user"] = user_info  # Обновляем данные пользователя
+        return user_info
+
 
 @router.get("/me/")
 async def get_me(user_data: User = Depends(get_current_user)):

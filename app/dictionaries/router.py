@@ -6,11 +6,12 @@ from sqlalchemy.orm import joinedload, selectinload
 from typing import List, Optional
 from app.database import async_session_maker
 from app.dictionaries.models import Product, Manufacturer, DimensionUnit, Subcategory, Category
-from app.dictionaries.service.base import ManufacturerDAO, ProductDAO
+from app.dictionaries.services.base import ManufacturerDAO, ProductDAO
 from app.dictionaries.schemas import SManufacturer, SManufacturerAdd, SManufacturerUpdate, SManufacturerUpdateById, SManufacturerFilter, SProduct, SProductAdd
 from app.dictionaries.filtr import FiltrProduct, FiltrManufacturer
+from app.dictionaries.service import fetch_all_manufacturers
 from app.session_maker import get_session_with_isolation
-
+from app.users.router import verify_keycloak_token
 
 
 # from  fastapi import APIRouter:
@@ -61,10 +62,15 @@ async def get_manufacturers_stream(request_body: SManufacturerFilter = Depends()
         return records
 
 @router.get("/manufacturers/", summary="Получить всех производителей", response_model=List[SManufacturer])
-async def get_all_manufacturers(request_body: SManufacturerFilter = Depends()) -> list[SManufacturer]:
-    return await ManufacturerDAO.find_all_opt(options=None,filters=request_body)
-    # manufacturers = await ManufacturerDAO.find_all_opt(options=None, filters=request_body)
-    # return [manufacturer.model_dump(by_alias=True) for manufacturer in manufacturers]
+async def get_all_manufacturers(
+        request_body: SManufacturerFilter = Depends(),
+        user: dict = Depends(verify_keycloak_token),
+        ) -> list[SManufacturer]:
+    print('user2222 ',user)
+    manufacturers = await fetch_all_manufacturers(request_body)
+    return manufacturers
+    #return await ManufacturerDAO.find_all_opt(options=None,filters=request_body)
+
 
 @router.get("/manufacturers/{id}", summary="Получить одого производителя")
 async def get_manufacturer_by_filter(request_body: SManufacturerFilter = Depends()) -> SManufacturer | dict:

@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 from app.config import get_auth_data
 from app.exceptions import TokenExpiredException, NoJwtException, NoUserIdException, ForbiddenException
 from app.users.dao import UsersDAO
-from app.dictionaries.service.base import BaseDAO
+from app.dictionaries.services.base import BaseDAO
 from pydantic import BaseModel, EmailStr
 
 

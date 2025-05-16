@@ -10,6 +10,7 @@
 <body>
     <h1>Список производителей</h1>
     <div>
+        {% if manufacturers %}
         {% for manufacturer in manufacturers %}
         <div>
             <h2>id: {{ manufacturer.id }}</h2>
@@ -18,6 +19,7 @@
             <p>manufacturer_name: {{ manufacturer.manufacturer_name }}</p>
         </div>
         {% endfor %}
+        {% endif %}
     </div>
 </body>
 </html>

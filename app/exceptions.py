@@ -1,5 +1,5 @@
 from fastapi import HTTPException, Request, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 import logging
 from fastapi.templating import Jinja2Templates
@@ -44,13 +44,36 @@ class ForbiddenException(HTTPException):
         super().__init__(status_code=status.HTTP_403_FORBIDDEN, detail=detail)
 
 
+from app.config import settings
+from authlib.integrations.starlette_client import OAuth
+oauth = OAuth()
+
+oauth.register(
+    name='keycloak',
+    client_id=settings.KEYCLOAK_CLIENT_ID,
+    client_secret=settings.KEYCLOAK_CLIENT_SECRET,
+    server_metadata_url=f"{settings.KEYCLOAK_URL}/realms/{settings.KEYCLOAK_REALM}/.well-known/openid-configuration",
+    redirect_uri=f"{settings.FRONT_URL}/auth/callback/",
+    client_kwargs={'scope': 'openid profile email'}
+)
+# Настройка Keycloak
+KEYCLOAK_URL = settings.KEYCLOAK_URL
+KEYCLOAK_REALM = settings.KEYCLOAK_REALM
+KEYCLOAK_CLIENT_ID = settings.KEYCLOAK_CLIENT_ID
+KEYCLOAK_CLIENT_SECRET = settings.KEYCLOAK_CLIENT_SECRET # удалить, если Access Type = public
+KEYCLOAK_ADMIN = settings.KEYCLOAK_ADMIN
+KEYCLOAK_ADMIN_PASSWORD = settings.KEYCLOAK_ADMIN_PASSWORD
+MASTER_REALM = "master"
+
 # Обработчики исключений
 async def http_exception_handler(request: Request, exc: HTTPException):
-    if exc.status_code == 401:  # Ошибка аутентификации
-        return templates.TemplateResponse(
-            name='login.html',
-            context={'request': request}
-        )
+    if exc.headers and 'Location' in exc.headers:
+        return RedirectResponse(url=exc.headers['Location'], status_code=exc.status_code)
+    # if exc.status_code == 401:  # Ошибка аутентификации
+    #     return templates.TemplateResponse(
+    #         name='login.html',
+    #         context={'request': request}
+    #     )
         # return templates.TemplateResponse(
         #     name='error.html',
         #     context={'request': request,
